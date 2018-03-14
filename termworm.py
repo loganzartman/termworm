@@ -41,6 +41,9 @@ class Snake:
         t.write("██")
         t.flush()
 
+    def intersecting(self, x, y):
+        return any(x == pos[0] and y == pos[1] for pos in self.old)
+
     def wrap(self):
         if self.x < 0:
             self.x = w-1
@@ -58,17 +61,21 @@ def update():
 def on_input(c):
     i = ord(c)
     if i == K_LEFT:
-        snake.vx = -1
-        snake.vy = 0
+        if not snake.intersecting(snake.x-1, snake.y):
+            snake.vx = -1
+            snake.vy = 0
     elif i == K_RIGHT:
-        snake.vx = 1
-        snake.vy = 0
+        if not snake.intersecting(snake.x+1, snake.y):
+            snake.vx = 1
+            snake.vy = 0
     elif i == K_UP:
-        snake.vx = 0
-        snake.vy = -1
+        if not snake.intersecting(snake.x, snake.y-1):
+            snake.vx = 0
+            snake.vy = -1
     elif i == K_DOWN:
-        snake.vx = 0
-        snake.vy = 1
+        if not snake.intersecting(snake.x, snake.y+1):
+            snake.vx = 0
+            snake.vy = 1
 
 app = Screensaver(t, 20, update = update, on_input = on_input)
 app.start()
