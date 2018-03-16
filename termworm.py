@@ -1,5 +1,6 @@
 from pytermfx import Terminal, Color, Style
 from pytermfx.tools import Screensaver
+from random import randint
 import time
 
 K_UP = 119 
@@ -54,9 +55,22 @@ class Snake:
         if self.y >= h:
             self.y = 0
 
+score = 0
 snake = Snake(int(w/2), int(h/2))
+food_x = snake.x
+food_y = snake.y
 def update():
+    global food_x, food_y, score
+    app.framerate = int(score / 5 + 60)
     snake.update()
+    if snake.x == food_x and snake.y == food_y:
+        food_x = randint(0, w)
+        food_y = randint(0, h)
+        snake.length += 1
+        score += 1
+        t.cursor_to(food_x * 2, food_y)
+        t.write("▞▞")
+        t.flush()
 
 def on_input(c):
     i = ord(c)
@@ -77,5 +91,5 @@ def on_input(c):
             snake.vx = 0
             snake.vy = 1
 
-app = Screensaver(t, 20, update = update, on_input = on_input)
+app = Screensaver(t, 10, update = update, on_input = on_input)
 app.start()
