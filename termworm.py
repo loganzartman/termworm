@@ -27,7 +27,7 @@ class Snake:
         self.y = y
         self.vx = 0
         self.vy = 0
-        self.length = 12
+        self.length = 36
         self.old = []
 
     def update(self):
@@ -60,7 +60,7 @@ class Snake:
 
 snake = Snake(int(game_w/2), int(game_h/2))
 input_q = []
-score = 0
+score = 24
 hiscore = 0
 food_x = snake.x
 food_y = snake.y
