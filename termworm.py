@@ -1,21 +1,24 @@
 from pytermfx import Terminal, Color, Style
-from pytermfx.tools import Screensaver
+from pytermfx.tools import Screensaver, draw_hline
 from random import randint, choice
 import time
+
+t = Terminal()
 
 K_UP = "up"
 K_DOWN = "down"
 K_RIGHT = "right"
 K_LEFT = "left"
 
-t = Terminal()
-w = int(t.w / 2)
-h = t.h
+game_x = 0
+game_y = 3
+game_w = 0
+game_h = 0
+
 def resize():
-    global w,h
-    w = int(t.w / 2)
-    h = t.h
-resize()
+    global t, game_x, game_y, game_w, game_h
+    game_w = int(t.w / 2 - game_x)
+    game_h = t.h - game_y
 t.add_resize_handler(resize)
 
 class Snake:
@@ -31,13 +34,13 @@ class Snake:
         self.old += [(self.x, self.y)]
         if len(self.old) > self.length:
             old = self.old.pop(0)
-            t.cursor_to(old[0] * 2, old[1])
+            t.cursor_to(old[0] * 2 + game_x, old[1] + game_y)
             t.write("  ")
 
         self.x += self.vx
         self.y += self.vy
         self.wrap()
-        t.cursor_to(snake.x * 2, snake.y)
+        t.cursor_to(snake.x * 2 + game_x, snake.y + game_y)
         t.style(Color.hsl(time.clock() * 5, 1.0, 0.7))
         t.write("██")
         t.flush()
@@ -47,21 +50,23 @@ class Snake:
 
     def wrap(self):
         if self.x < 0:
-            self.x = w-1
+            self.x = game_w - 1
         if self.y < 0:
-            self.y = h-1
-        if self.x >= w:
+            self.y = game_h - 1
+        if self.x >= game_w:
             self.x = 0
-        if self.y >= h:
+        if self.y >= game_h:
             self.y = 0
 
+snake = Snake(int(game_w/2), int(game_h/2))
 input_q = []
 score = 0
-snake = Snake(int(w/2), int(h/2))
+hiscore = 0
 food_x = snake.x
 food_y = snake.y
+
 def update():
-    global food_x, food_y, score, app
+    global food_x, food_y, score, hiscore, app
     app.framerate = int(min(20, score / 5) + 10)
     process_input()
     snake.update()
@@ -69,15 +74,27 @@ def update():
         move_food()
         snake.length += 1
         score += 1
+        hiscore = max(hiscore, score)
+        draw_ui()
+
+def draw_ui():
+    global t, score, hiscore
+    t.cursor_to(0, 0)
+    t.style(Color.hex(0xFFFFFF)).writeln("~TermWorm~")
+    t.style(Color.hex(0x777777)).writeln("▞ Score: ", score).flush()
+    t.style(Color.hex(0x777777))
+    draw_hline(t, 2)
+t.add_resize_handler(draw_ui)
 
 def move_food():
-    global food_x, food_y, snake
-    positions = [(x,y) for x in range(w) for y in range(h)
+    global t, food_x, food_y, snake
+    positions = [(x,y) for x in range(game_w) for y in range(game_h)
         if not snake.intersecting(x, y)]
     food_x, food_y = choice(positions)
-    t.cursor_to(food_x * 2, food_y)
+    t.cursor_to(food_x * 2 + game_x, food_y + game_y)
     t.write("▞▞")
     t.flush()
+t.add_resize_handler(move_food)
 
 def process_input():
     global input_q
