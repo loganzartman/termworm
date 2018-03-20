@@ -1,12 +1,12 @@
 from pytermfx import Terminal, Color, Style
 from pytermfx.tools import Screensaver
-from random import randint
+from random import randint, choice
 import time
 
-K_UP = 119 
-K_DOWN = 115
-K_RIGHT = 100
-K_LEFT = 97
+K_UP = "up"
+K_DOWN = "down"
+K_RIGHT = "right"
+K_LEFT = "left"
 
 t = Terminal()
 w = int(t.w / 2)
@@ -55,41 +55,57 @@ class Snake:
         if self.y >= h:
             self.y = 0
 
+input_q = []
 score = 0
 snake = Snake(int(w/2), int(h/2))
 food_x = snake.x
 food_y = snake.y
 def update():
-    global food_x, food_y, score
-    app.framerate = int(score / 5 + 60)
+    global food_x, food_y, score, app
+    app.framerate = int(min(20, score / 5) + 10)
+    process_input()
     snake.update()
     if snake.x == food_x and snake.y == food_y:
-        food_x = randint(0, w)
-        food_y = randint(0, h)
+        move_food()
         snake.length += 1
         score += 1
-        t.cursor_to(food_x * 2, food_y)
-        t.write("▞▞")
-        t.flush()
+
+def move_food():
+    global food_x, food_y, snake
+    positions = [(x,y) for x in range(w) for y in range(h)
+        if not snake.intersecting(x, y)]
+    food_x, food_y = choice(positions)
+    t.cursor_to(food_x * 2, food_y)
+    t.write("▞▞")
+    t.flush()
+
+def process_input():
+    global input_q
+    for i, c in enumerate(input_q):
+        if c == K_LEFT:
+            if not snake.intersecting(snake.x-1, snake.y):
+                snake.vx = -1
+                snake.vy = 0
+                input_q = input_q[i+1:]
+        elif c == K_RIGHT:
+            if not snake.intersecting(snake.x+1, snake.y):
+                snake.vx = 1
+                snake.vy = 0
+                input_q = input_q[i+1:]
+        elif c == K_UP:
+            if not snake.intersecting(snake.x, snake.y-1):
+                snake.vx = 0
+                snake.vy = -1
+                input_q = input_q[i+1:]
+        elif c == K_DOWN:
+            if not snake.intersecting(snake.x, snake.y+1):
+                snake.vx = 0
+                snake.vy = 1
+                input_q = input_q[i+1:]
 
 def on_input(c):
-    i = ord(c)
-    if i == K_LEFT:
-        if not snake.intersecting(snake.x-1, snake.y):
-            snake.vx = -1
-            snake.vy = 0
-    elif i == K_RIGHT:
-        if not snake.intersecting(snake.x+1, snake.y):
-            snake.vx = 1
-            snake.vy = 0
-    elif i == K_UP:
-        if not snake.intersecting(snake.x, snake.y-1):
-            snake.vx = 0
-            snake.vy = -1
-    elif i == K_DOWN:
-        if not snake.intersecting(snake.x, snake.y+1):
-            snake.vx = 0
-            snake.vy = 1
+    global input_q
+    input_q.append(c)
 
 app = Screensaver(t, 10, update = update, on_input = on_input)
 app.start()
