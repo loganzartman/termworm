@@ -1,5 +1,5 @@
 from pytermfx import Terminal, Color, Style
-from pytermfx.tools import Screensaver, draw_hline
+from pytermfx.tools import TerminalApp, draw_hline, print_hcenter
 from random import randint, choice
 import time
 
@@ -25,28 +25,34 @@ class Snake:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.vx = 0
+        self.vx = 1
         self.vy = 0
         self.length = 36
         self.old = []
 
     def update(self):
+        global app
         self.old += [(self.x, self.y)]
         if len(self.old) > self.length:
             old = self.old.pop(0)
             t.cursor_to(old[0] * 2 + game_x, old[1] + game_y)
             t.write("  ")
 
+        if self.intersecting(self.x + self.vx, self.y + self.vy):
+            app.stop(game_end)
+            return
+
         self.x += self.vx
         self.y += self.vy
         self.wrap()
+
         t.cursor_to(snake.x * 2 + game_x, snake.y + game_y)
         t.style(Color.hsl(time.clock() * 5, 1.0, 0.7))
         t.write("██")
         t.flush()
 
     def intersecting(self, x, y):
-        return any(x == pos[0] and y == pos[1] for pos in self.old)
+        return any(x == pos[0] and y == pos[1] for pos in self.old[1:])
 
     def wrap(self):
         if self.x < 0:
@@ -124,5 +130,22 @@ def on_input(c):
     global input_q
     input_q.append(c)
 
-app = Screensaver(t, 10, update = update, on_input = on_input)
+def game_end():
+    global t
+
+    # Draw endgame screen
+    t.clear()
+    t.style(Color.hex(0xFFFF00))
+    print_hcenter(t, "Game over!", t.h // 3)
+    t.style(Color.hex(0xFFFFFF))
+    print_hcenter(t, "You scored: {}".format(score), t.h // 3 + 1)
+    t.style(Color.hex(0x777777))
+    print_hcenter(t, "Press q to quit.", t.h // 3 + 2)
+    t.flush()
+    
+    # Wait for keypress
+    while t.getch() != "q":
+        pass
+
+app = TerminalApp(t, 10, update = update, on_input = on_input)
 app.start()
