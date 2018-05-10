@@ -4,6 +4,7 @@ from random import randint, choice
 import time
 
 t = Terminal()
+t.cursor_set_visible(False)
 
 K_UP = "up"
 K_DOWN = "down"
@@ -47,7 +48,7 @@ class Snake:
         self.wrap()
 
         t.cursor_to(snake.x * 2 + game_x, snake.y + game_y)
-        t.style(Color.hsl(time.clock() * 5, 1.0, 0.7))
+        t.style(Color.hsl(time.monotonic() * 0.1, 1.0, 0.7))
         t.write("██")
         t.flush()
 
@@ -87,7 +88,7 @@ def draw_ui():
     global t, score, hiscore
     t.cursor_to(0, 0)
     t.style(Color.hex(0xFFFFFF)).writeln("~TermWorm~")
-    t.style(Color.hex(0x777777)).writeln("▞ Score: ", score).flush()
+    t.style(Color.hex(0x777777)).writeln("░ Score: ", score).flush()
     t.style(Color.hex(0x777777))
     draw_hline(t, 2)
 t.add_resize_handler(draw_ui)
@@ -98,7 +99,7 @@ def move_food():
         if not snake.intersecting(x, y)]
     food_x, food_y = choice(positions)
     t.cursor_to(food_x * 2 + game_x, food_y + game_y)
-    t.write("▞▞")
+    t.write("░░")
     t.flush()
 t.add_resize_handler(move_food)
 
@@ -128,6 +129,9 @@ def process_input():
 
 def on_input(c):
     global input_q
+    if c == "q":
+        app.stop(game_end)
+        return
     input_q.append(c)
 
 def game_end():
