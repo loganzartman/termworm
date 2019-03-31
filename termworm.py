@@ -12,6 +12,19 @@ game_y = 3
 game_w = 4
 game_h = 4
 
+def load_hiscore():
+    try:
+        with open("hiscore", "x") as f:
+            f.write("0")
+    except:
+        pass
+    with open("hiscore", "r") as f:
+        return int(f.read())
+
+def save_hiscore(score):
+    with open("hiscore", "w") as f:
+        f.write(str(score))
+
 class GameOver(BaseException):
     def __init__(self, message=""):
         super().__init__(message)
@@ -22,7 +35,7 @@ class TermwormApp(App):
         self.worm = Worm(int(game_w/2), int(game_h/2))
         
         self.score = 0
-        self.hiscore = 0
+        self.hiscore = load_hiscore()
         self.t0 = time.perf_counter()
 
         self.on_resize()
@@ -74,6 +87,7 @@ class TermwormApp(App):
             self.worm.length += 1
             self.score += 1
             self.hiscore = max(self.hiscore, self.score)
+            save_hiscore(self.hiscore)
         self.draw_ui()
         self.draw_food()
         self.screen.update()
@@ -90,7 +104,8 @@ class TermwormApp(App):
 
     def draw_ui(self):
         self.screen.print("~TermWorm~", 0, 0, fg=Color.rgb(1,1,1))
-        self.screen.print("░ Score: {}".format(self.score), 0, 1, fg=Color.rgb(0.5,0.5,0.5))
+        x, y = self.screen.print("░ Score: {} / ".format(self.score), 0, 1, fg=Color.rgb(0.5,0.5,0.5))
+        self.screen.print("Hi: {}".format(self.hiscore), x + 1, y, fg=Color.rgb(0.5,0.5,0.))
         self.screen.print("─" * self.screen.w, 0, 2, fg=Color.rgb(0.5,0.5,0.5))
 
     def draw_food(self):
