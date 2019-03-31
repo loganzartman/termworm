@@ -1,5 +1,4 @@
-from termpixels.app import App
-from termpixels.screen import Color
+from termpixels import App, Color 
 from random import randint, choice
 import time
 
@@ -18,8 +17,7 @@ class GameOver(BaseException):
         super().__init__(message)
 
 class TermwormApp(App):
-    def __init__(self):
-        super().__init__()
+    def on_start(self):
         self.mode = "game"
         self.worm = Worm(int(game_w/2), int(game_h/2))
         
