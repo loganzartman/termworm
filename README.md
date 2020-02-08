@@ -4,9 +4,8 @@
 ![TermWorm Screenshot](promo.png?raw=true "Gameplay")
 
 ## Dependencies
-0. Unix environment
 1. Python 3
-2. termpixels (`pip install termpixels`)
+2. termpixels (`pip install -r requirements.txt`)
 
 ## Playing
 * `python termworm.py`
@@ -18,4 +17,3 @@
 
 [pytermfx]: https://github.com/loganzartman/pytermfx
 [termpixels]: https://github.com/loganzartman/termpixels
-
