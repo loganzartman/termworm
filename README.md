@@ -11,7 +11,7 @@
 * `python termworm.py`
 * Use arrow keys to turn
 * Collect food chunks 
-* Press ctrl+c to quit
+* Press escape to quit
 
 *formerly built on [pytermfx][pytermfx]*
 
